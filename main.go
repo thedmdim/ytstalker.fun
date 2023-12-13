@@ -24,8 +24,12 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot open db", err)
 	}
+	dbScheme, err := os.ReadFile("tables.sql")
+	if err != nil {
+		log.Fatal("cannot open tables.sql: ", err.Error())
+	}
 	conn := db.Get(context.Background())
-	if err := sqlitex.ExecuteScript(conn, api.CreateTables, nil); err != nil {
+	if err := sqlitex.ExecuteScript(conn, string(dbScheme), nil); err != nil {
 		log.Fatal("cannot create db: ", err)
 	}
 	db.Put(conn)
