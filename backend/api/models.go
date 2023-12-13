@@ -13,7 +13,7 @@ type Message struct {
 }
 
 type RandomResponse struct {
-	Video     *Video     `json:"video,omitempty"`
+	Video     *Video    `json:"video,omitempty"`
 	Reactions Reactions `json:"reactions"`
 }
 
