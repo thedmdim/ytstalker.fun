@@ -13,7 +13,6 @@ import (
 	"ytstalker/backend/conf"
 	"ytstalker/backend/youtube"
 
-	"golang.org/x/crypto/acme/autocert"
 	"zombiezen.com/go/sqlite/sqlitex"
 )
 
@@ -25,12 +24,8 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot open db", err)
 	}
-	dbScheme, err := os.ReadFile("db.sql")
-	if err != nil {
-		log.Fatal("cannot open db.sql: ", err.Error())
-	}
 	conn := db.Get(context.Background())
-	if err := sqlitex.ExecuteScript(conn, string(dbScheme), nil); err != nil {
+	if err := sqlitex.ExecuteScript(conn, api.CreateTables, nil); err != nil {
 		log.Fatal("cannot create db: ", err)
 	}
 	db.Put(conn)
@@ -45,22 +40,11 @@ func main() {
 		Handler: handler,
 	}
 
-	// serve https
+	// serve
 	go func() {
-		err := server.Serve(autocert.NewListener(config.Domain))
-		if err != nil {
-			log.Println("error serving 443 (https):", err.Error())
-		}
-	}()
-
-	// redirect http to https
-	go func() {
-		err := http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			http.Redirect(w, r, "https://" + config.Domain + r.RequestURI, http.StatusMovedPermanently)
-		}))
-		if err != nil {
-			log.Println("error redirecting 80 to 443:", err.Error())
-		}
+		if err := server.ListenAndServe(); err != http.ErrServerClosed {
+            log.Fatalf("ListenAndServe: %v", err)
+        }
 	}()
 
 	// preparation for gracefull shutdown
