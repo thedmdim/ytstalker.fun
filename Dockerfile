@@ -9,5 +9,5 @@ RUN ls /usr/src/app
 FROM gcr.io/distroless/static-debian11
 WORKDIR /usr/bin/app
 COPY --from=builder /usr/bin/app .
-COPY --from=builder /usr/src/app/tables.sql .
+COPY --from=builder /usr/src/app/tables.sql tables.sql
 ENTRYPOINT app
