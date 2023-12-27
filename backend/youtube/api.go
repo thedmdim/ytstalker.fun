@@ -14,11 +14,12 @@ type YouTubeRequester struct {
 	client *http.Client 
 	conf *conf.Config
 	currentApiKeyN int
+	baseUrl string
 }
 
 func NewYouTubeRequester(conf *conf.Config) *YouTubeRequester {
 	return &YouTubeRequester{
-		conf: conf,
+		baseUrl: "https://www.googleapis.com/youtube/v3",
 		client: &http.Client{
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				return http.ErrUseLastResponse
@@ -30,7 +31,7 @@ func NewYouTubeRequester(conf *conf.Config) *YouTubeRequester {
 // "inurl:" + RandomYoutubeVideoId()
 func (y *YouTubeRequester) Search(query string) (*SearchResponse, error) {
 
-	req, _ := http.NewRequest("GET", y.conf.YouTubeApiUrl + "/search", nil)
+	req, _ := http.NewRequest("GET", y.baseUrl + "/search", nil)
 	q := url.Values{}
     q.Add("part", "snippet")
     q.Add("maxResults", "50")
@@ -51,7 +52,7 @@ func (y *YouTubeRequester) Search(query string) (*SearchResponse, error) {
 
 func (y *YouTubeRequester) VideosInfo(ids []string) (*VideosResponse, error) {
 
-	req, _ := http.NewRequest("GET", y.conf.YouTubeApiUrl + "/videos", nil)
+	req, _ := http.NewRequest("GET", y.baseUrl + "/videos", nil)
 	// q := url.Values{}
     // q.Add("part", "statistics,snippet")
 	// q.Add("id", strings.Join(ids, ","))

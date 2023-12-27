@@ -1,9 +1,9 @@
 package conf
 
 import (
-	"encoding/json"
 	"log"
 	"os"
+	"strings"
 )
 
 type Config struct {
@@ -15,28 +15,19 @@ type Config struct {
 
 func ParseConfig(path string) *Config {
 	// parse config
-	configFile, err := os.Open(path)
-    if err != nil {
-        log.Fatalf("cannot open %s: %s", path, err.Error())
-    }
-    defer configFile.Close()
-
-	log.Printf("successfully opened %s", path)
 
 	config := &Config{}
-    json.NewDecoder(configFile).Decode(config)
 
-	// paste default value
-	if config.YouTubeApiUrl == "" {
-		config.YouTubeApiUrl = "https://www.googleapis.com/youtube/v3"
-	}
-
-	if len(config.YouTubeApiKeys) == 0 {
-		log.Fatal("You forgot to provide YouTube API keys!")
-	}
-
+	config.Addr = os.Getenv("ADDR")
+	
+	config.DSN = os.Getenv("DSN")
 	if config.DSN == "" {
 		config.DSN = "server.db"
+	}
+
+	config.YouTubeApiKeys = strings.Split(os.Getenv("YT_API_KEYS"), ",")
+	if len(config.YouTubeApiKeys) == 0 {
+		log.Fatal("You forgot to provide YouTube API keys!")
 	}
 
 	return config
